@@ -28,6 +28,23 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         else:
             file = req_body.get('file')
 
+    windfarm = req.params.get('windfarm')
+    if not windfarm:
+        try:
+            req_body = req.get_json()
+        except ValueError:
+            pass
+        else:
+            windfarm = req_body.get('windfarm')
+    
+    path = req.params.get('path')
+    if not path:
+        try:
+            req_body = req.get_json()
+        except ValueError:
+            pass
+        else:
+            path = req_body.get('path')
 
     discovery.add_primitives_path("C:\\IBD\\02.Renovables\\SMP\\FunctionApps\\Jonseba\\.venv\\Lib\\site-packages\\cms_ml-0.1.7.dev1-py3.8.egg\\cms_ml\\primitives\\cms_ml\\")
 
@@ -46,7 +63,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
     storage_account_name = "adlsmp"
     contenedor = "fssmp"
-    source_dir = "raw_data"
+    source_dir = path.rsplit("/", 1)[0]
     sink_dir = "processed_data"
     sink_file = file.split(".")[0] + ".csv"
 
@@ -58,16 +75,6 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     file_system_client = service_client_sink.get_file_system_client(file_system=contenedor)
     # Define the source and sink directories.
     directory_client_source = file_system_client.get_directory_client(source_dir)
-
-    print("asdddddddddddddddddddddd\n")
-
-
-    path_list = file_system_client.get_paths()
-    for path in path_list:
-        print(path.name + '\n')
-
-
-    print("asdddddddddddddddddddddd\n")
 
     directory_client_sink = file_system_client.get_directory_client(sink_dir)
     # Define the source and sink files (.MED y .csv, respectively).
@@ -100,6 +107,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     # Apply .med parser.
     data = parse_cms_directory(input_directory = "tmp", parser = parse_med_txt, extension = 'med')
     data.turbine_id = "T" + data.turbine_id.str.extract('(\d+)')[0].str.zfill(3)
+    data['site'] = windfarm
     #print(data)
 
     transformations = [
