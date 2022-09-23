@@ -31,7 +31,6 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
     discovery.add_primitives_path("C:\\IBD\\02.Renovables\\SMP\\FunctionApps\\Jonseba\\.venv\\Lib\\site-packages\\cms_ml-0.1.7.dev1-py3.8.egg\\cms_ml\\primitives\\cms_ml\\")
 
-
     #connection_string = "DefaultEndpointsProtocol=https;AccountName=adlsmp;AccountKey=WNk38TUO/zv4natpUzAqoUfwEez1/a8zLc5r068VZWCCSqlKhQojpVWLtQeC/XT/RekMBMhxEOE1+ASt4L8KAw==;EndpointSuffix=core.windows.net"
     storage_account_key = "WNk38TUO/zv4natpUzAqoUfwEez1/a8zLc5r068VZWCCSqlKhQojpVWLtQeC/XT/RekMBMhxEOE1+ASt4L8KAw=="
 
@@ -59,6 +58,17 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     file_system_client = service_client_sink.get_file_system_client(file_system=contenedor)
     # Define the source and sink directories.
     directory_client_source = file_system_client.get_directory_client(source_dir)
+
+    print("asdddddddddddddddddddddd\n")
+
+
+    path_list = file_system_client.get_paths()
+    for path in path_list:
+        print(path.name + '\n')
+
+
+    print("asdddddddddddddddddddddd\n")
+
     directory_client_sink = file_system_client.get_directory_client(sink_dir)
     # Define the source and sink files (.MED y .csv, respectively).
     file_client_source = directory_client_source.get_file_client(file)
@@ -108,7 +118,9 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
     aggregations = [] +\
     harm_gen(28,3,3, name = "HSS", primitive = "cms_ml.aggregations.amplitude.band.band_max") +\
-    harm_gen(40,2,3, name = "random", primitive = "cms_ml.aggregations.amplitude.band.band_max")
+    harm_gen(28,3,3, name = "HSS", primitive = "cms_ml.aggregations.amplitude.band.band_sum") +\
+    harm_gen(40,2,3, name = "random", primitive = "cms_ml.aggregations.amplitude.band.band_max") +\
+    harm_gen(101,1,3, name = "F101", primitive = "cms_ml.aggregations.amplitude.band.band_max") 
 
     pipe = SigPro(transformations = transformations, aggregations = aggregations, keep_columns = True, values_column_name = "y_value")
 

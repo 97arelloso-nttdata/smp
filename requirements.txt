@@ -11,7 +11,8 @@ numpy==1.18.5
 grpcio-tools==1.32.0
 grpcio==1.32.0
 cffi==1.15.1
-git+https://63248f46de0e09a718d78354f15010a7cd9174a8@github.com/sintel-dev/SigPro.git
+git+https://git@github.com/sintel-dev/SigPro.git
+#git+ssh://git@github.corp.iberdrola.com:/Iberdrola/ren-gts-cms_ml.git
 matplotlib==3.2.0
 boto3==1.14.44
 botocore==1.17.44
@@ -37,3 +38,6 @@ cloudpickle==1.6.0
 tabulate==0.8.10
 pymongo==3.12.3
 baytune==0.4.0
+protobuf==3.19.5
+tifffile==2021.11.2
+glob2==0.7
