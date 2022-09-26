@@ -65,7 +65,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     contenedor = "fssmp"
     source_dir = path.rsplit("/", 1)[0]
     sink_dir = "processed_data"
-    sink_file = file.split(".")[0] + ".csv"
+    sink_file = windfarm + "_" + file.split(".")[0] + ".csv"
 
     # Generate the class DataLakeServiceClient for the ADL Gen2 defined.
     service_client_sink = DataLakeServiceClient(account_url="{}://{}.dfs.core.windows.net".format("https", storage_account_name), credential=storage_account_key)
@@ -108,7 +108,6 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     data = parse_cms_directory(input_directory = "tmp", parser = parse_med_txt, extension = 'med')
     data.turbine_id = "T" + data.turbine_id.str.extract('(\d+)')[0].str.zfill(3)
     data['site'] = windfarm
-    #print(data)
 
     transformations = [
         {
@@ -125,10 +124,12 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     ]
 
     aggregations = [] +\
-    harm_gen(28,3,3, name = "HSS", primitive = "cms_ml.aggregations.amplitude.band.band_max") +\
     harm_gen(28,3,3, name = "HSS", primitive = "cms_ml.aggregations.amplitude.band.band_sum") +\
-    harm_gen(40,2,3, name = "random", primitive = "cms_ml.aggregations.amplitude.band.band_max") +\
-    harm_gen(101,1,3, name = "F101", primitive = "cms_ml.aggregations.amplitude.band.band_max") 
+    harm_gen(28,3,3, name = "HSS", primitive = "cms_ml.aggregations.amplitude.band.band_max") +\
+    harm_gen(101,1,3, name = "F101", primitive = "cms_ml.aggregations.amplitude.band.band_sum") +\
+    harm_gen(101,1,3, name = "F101", primitive = "cms_ml.aggregations.amplitude.band.band_max") +\
+    harm_gen(151,1,3, name = "F151", primitive = "cms_ml.aggregations.amplitude.band.band_sum")
+    #harm_gen(151,1,3, name = "F151", primitive = "cms_ml.aggregations.amplitude.band.band_max")
 
     pipe = SigPro(transformations = transformations, aggregations = aggregations, keep_columns = True, values_column_name = "y_value")
 
