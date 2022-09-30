@@ -13,6 +13,8 @@ grpcio==1.32.0
 cffi==1.15.1
 git+https://git@github.com/sintel-dev/SigPro.git
 #git+ssh://git@github.corp.iberdrola.com:/Iberdrola/ren-gts-cms_ml.git
+#git+file:///C:/Users/arelloso/Downloads/ren-gts-cms_ml-master/
+git+https://git@github.com/97arelloso-nttdata/cms_ml_prueba.git@master
 matplotlib==3.2.0
 boto3==1.14.44
 botocore==1.17.44

@@ -9,6 +9,8 @@ from azure.identity import DefaultAzureCredential
 
 import pandas as pd
 import os
+import sys
+import glob
 
 from sigpro import get_primitives, discovery
 from cms_ml.parsers.cms_texts import parse_med_txt, parse_cms_directory
@@ -17,6 +19,10 @@ from sigpro.core import SigPro
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
+    logging.info(glob.glob(os.getcwd()))
+    logging.info(os.getcwd())
+    #logging.info(glob.glob(os.path.join(os.getcwd(), '*')))
+    #logging.info(glob.glob(os.path.join(os.getcwd(), '*', '*')))
 
     # Collect the name of the .MED file to process (string: T001_H_20201001_MEDIDAS.MED)
     file = req.params.get('file')
@@ -46,7 +52,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         else:
             path = req_body.get('path')
 
-    discovery.add_primitives_path("C:\\IBD\\02.Renovables\\SMP\\FunctionApps\\Jonseba\\.venv\\Lib\\site-packages\\cms_ml-0.1.7.dev1-py3.8.egg\\cms_ml\\primitives\\cms_ml\\")
+    #discovery.add_primitives_path(os.path.join(sys.prefix, 'Lib/site-packages/cms_ml-0.1.7.dev1-py3.8.egg/cms_ml/primitives/cms_ml/'))
+    discovery.add_primitives_path(os.path.join(os.getcwd(), '.python_packages/lib/site-packages/cms_ml/primitives/cms_ml/'))
 
     #connection_string = "DefaultEndpointsProtocol=https;AccountName=adlsmp;AccountKey=WNk38TUO/zv4natpUzAqoUfwEez1/a8zLc5r068VZWCCSqlKhQojpVWLtQeC/XT/RekMBMhxEOE1+ASt4L8KAw==;EndpointSuffix=core.windows.net"
     storage_account_key = "WNk38TUO/zv4natpUzAqoUfwEez1/a8zLc5r068VZWCCSqlKhQojpVWLtQeC/XT/RekMBMhxEOE1+ASt4L8KAw=="
@@ -90,24 +97,49 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
     # Define where to store the temporary files. In this case, it'll
     # be in "/tmp/", because it's a Linux machine.
-    local_raw_path = "tmp/"+ file
-    local_sink_path = "tmp/"+ sink_file
+    #local_path = os.path.join(os.getcwd(), 'tmp/')
+    local_raw_path = "/tmp/"+ file
+    local_sink_path = "/tmp/"+ sink_file
 
     # Create on the local machine the .MED file (empty).
     local_file_prueba = open(local_raw_path, 'wb')
+    logging.info(os.path.realpath(local_file_prueba.name))
+    logging.info(os.path.abspath(local_file_prueba.name))
+    logging.info(local_file_prueba.name)
+    logging.info(glob.glob(os.path.join("/home", '*/*', '*')))
+    logging.info(glob.glob(os.path.join("/home", '*/*/*', '*')))
+    logging.info(glob.glob(os.path.join("/home", '*/*/*', '*')))
+    logging.info(glob.glob(os.path.join("tmp", '*{0}*.{1}'.format('', 'med')))) #['tmp\\T001_H_20201001_MEDIDAS.MED']
+    logging.info(glob.glob(os.path.join("/tmp", '*{0}*.{1}'.format('', 'med')))) #[]
+    logging.info(glob.glob(os.path.join("/tmp/", '*{0}*.{1}'.format('', 'med')))) #[]
+    logging.info(glob.glob(os.path.join("tmp/", '*{0}*.{1}'.format('', 'med')))) #['tmp\\T001_H_20201001_MEDIDAS.MED']
+    logging.info(glob.glob(os.path.join('', '*/*.med'))) #['tmp\\T001_H_20201001_MEDIDAS.MED']
+    logging.info(glob.glob(os.path.join('', '*.med'))) #[]
+    logging.info(glob.glob(os.path.join('', '*/*/*.med'))) #[]
+    logging.info(glob.glob(os.path.join('', '*/*/*/*.med'))) #[]
+    logging.info(glob.glob(os.path.join('', '*/*/*/*/*.med'))) #[]
 
     # Download from the ADL the .MED file and store it on the path "/tmp/"
     # for the file just created.
     download = file_client_source.download_file()
     downloaded_bytes = download.readall()
     local_file_prueba.write(downloaded_bytes)
-
+    logging.info("lista 2")
+    logging.info(local_raw_path)
+    logging.info(glob.glob(os.path.join(os.getcwd(), '*', '*')))
     # TODO controlar las excepciones (aunque no debería pasar nada puesto
     # que se ejecutan los parsers uno a uno).
     # Apply .med parser.
-    data = parse_cms_directory(input_directory = "tmp", parser = parse_med_txt, extension = 'med')
-    data.turbine_id = "T" + data.turbine_id.str.extract('(\d+)')[0].str.zfill(3)
+    #data = parse_cms_directory(input_directory = "/tmp", parser = parse_med_txt, extension = 'MED')
+    data = parse_med_txt(local_raw_path)
+    logging.info(os.path.isdir("/tmp"))
+    logging.info(data.describe) #
+    logging.info(type(data))
+
+    #data.turbine_id = "T" + data.turbine_id.str.extract('(\d+)')[0].str.zfill(3)
     data['site'] = windfarm
+    logging.info(data.describe) #site
+    logging.info(type(data))
 
     transformations = [
         {
@@ -134,10 +166,14 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     pipe = SigPro(transformations = transformations, aggregations = aggregations, keep_columns = True, values_column_name = "y_value")
 
     data_agg, metrics = pipe.process_signal(data = data)
-    smp_csv = data_agg.drop(["rms","y_value"], axis = 1)
+    logging.info(data_agg.describe) #site, site
+    logging.info(type(data_agg))
+    data_agg.drop(['rms','y_value'], axis=1, inplace=True)
+    #SELECT EN VEZ DE DROP
+    #
 
     # Store the generated .csv in the local path "/tmp/"    
-    smp_csv.to_csv(local_sink_path) 
+    data_agg.to_csv(local_sink_path) 
 
     # Open on read mode the .csv file created.
     local_file = open(local_sink_path,'r')
