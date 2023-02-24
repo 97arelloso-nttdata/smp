@@ -47,8 +47,18 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         else:
             path = req_body.get('path')
 
-    discovery.add_primitives_path(os.path.join(sys.prefix, 'Lib/site-packages/cms_ml-0.1.7.dev1-py3.8.egg/cms_ml/primitives/cms_ml/'))
-    #discovery.add_primitives_path(os.path.join(os.getcwd(), '.python_packages/lib/site-packages/cms_ml/primitives/cms_ml/'))
+    agg = req.params.get('agg')
+    if not agg:
+        try:
+            req_body = req.get_json()
+        except ValueError:
+            pass
+        else:
+            agg = req_body.get('agg')
+
+
+    #discovery.add_primitives_path(os.path.join(sys.prefix, 'Lib/site-packages/cms_ml-0.1.7.dev1-py3.8.egg/cms_ml/primitives/cms_ml/'))
+    discovery.add_primitives_path(os.path.join(os.getcwd(), '.python_packages/lib/site-packages/cms_ml/primitives/cms_ml/'))
 
     #connection_string = "DefaultEndpointsProtocol=https;AccountName=adlsmp;AccountKey=WNk38TUO/zv4natpUzAqoUfwEez1/a8zLc5r068VZWCCSqlKhQojpVWLtQeC/XT/RekMBMhxEOE1+ASt4L8KAw==;EndpointSuffix=core.windows.net"
     storage_account_key = "WNk38TUO/zv4natpUzAqoUfwEez1/a8zLc5r068VZWCCSqlKhQojpVWLtQeC/XT/RekMBMhxEOE1+ASt4L8KAw=="
@@ -93,8 +103,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     # Define where to store the temporary files. In this case, it'll
     # be in "/tmp/", because it's a Linux machine.
     #local_path = os.path.join(os.getcwd(), 'tmp/')
-    local_raw_path = "tmp/"+ file
-    local_sink_path = "tmp/"+ sink_file
+    local_raw_path = "/tmp/"+ file
+    local_sink_path = "/tmp/"+ sink_file
 
     # Create on the local machine the .MED file (empty).
     local_file_prueba = open(local_raw_path, 'wb')
@@ -128,13 +138,10 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         }
     ]
 
-    aggregations = [] +\
-    harm_gen(28,3,3, name = "HSS", primitive = "cms_ml.aggregations.amplitude.band.band_sum") +\
-    harm_gen(28,3,3, name = "HSS", primitive = "cms_ml.aggregations.amplitude.band.band_max") +\
-    harm_gen(101,1,3, name = "F101", primitive = "cms_ml.aggregations.amplitude.band.band_sum") +\
-    harm_gen(101,1,3, name = "F101", primitive = "cms_ml.aggregations.amplitude.band.band_max") +\
-    harm_gen(151,1,3, name = "F151", primitive = "cms_ml.aggregations.amplitude.band.band_sum")
-    #harm_gen(151,1,3, name = "F151", primitive = "cms_ml.aggregations.amplitude.band.band_max")
+    aggregations = []
+
+    for entry in agg:
+        aggregations += harm_gen(int(entry['frequency']),int(entry['harmonics']),int(entry['width']), name = entry['name'], primitive = entry['primitive'])
 
     pipe = SigPro(transformations = transformations, aggregations = aggregations, keep_columns = True, values_column_name = "y_value")
 
