@@ -22,8 +22,6 @@ on:
   push:
     branches:
       - "master"
-    types:
-      - "closed"
   workflow_dispatch:
 
 env:
