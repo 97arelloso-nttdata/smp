@@ -54,7 +54,7 @@ jobs:
         pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
         python -m pip install --upgrade pip
         git config --global http.sslbackend gnutls
-        pip install git+https://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@github.corp.iberdrola.com/Iberdrola/ren-gts-cms_ml.git
+        pip install git+https://github.corp.iberdrola.com/Iberdrola/ren-gts-cms_ml.git
         pip install -r requirements.txt --target=".python_packages/lib/site-packages"
         popd
 
