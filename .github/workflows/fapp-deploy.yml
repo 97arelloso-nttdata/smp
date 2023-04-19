@@ -54,8 +54,7 @@ jobs:
         pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
         python -m pip install --upgrade pip
         git config --global http.sslbackend gnutls
-        git config --global http.proxy http://e880708:Ar16092025_@proxySERVERS-B.corp.iberdrola.com:8085
-        pip install git+https://github.corp.iberdrola.com/Iberdrola/ren-gts-cms_ml.git
+        pip install git+ssh://git@github.corp.iberdrola.com:Iberdrola/ren-gts-cms_ml.git
         pip install -r requirements.txt --target=".python_packages/lib/site-packages"
         popd
 
