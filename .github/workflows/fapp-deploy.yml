@@ -54,6 +54,7 @@ jobs:
         pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
         python -m pip install --upgrade pip
         git config --global http.sslbackend gnutls
+        pip install git+https://github.com/97arelloso-nttdata/lightfm_prueba.git
         pip install -r requirements.txt --target=".python_packages/lib/site-packages"
         popd
 
