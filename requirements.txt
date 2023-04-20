@@ -6,7 +6,6 @@ azure-functions
 azure-storage-file-datalake
 azure-keyvault
 azure-identity
-lightfm==1.15
 pandas==1.4.4
 numpy==1.18.5
 grpcio-tools==1.32.0
