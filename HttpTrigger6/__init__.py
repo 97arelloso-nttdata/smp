@@ -58,10 +58,12 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
 
     #discovery.add_primitives_path(os.path.join(sys.prefix, 'Lib/site-packages/cms_ml-0.1.7.dev1-py3.8.egg/cms_ml/primitives/cms_ml/'))
-    discovery.add_primitives_path(os.path.join(os.getcwd(), '.python_packages/lib/site-packages/cms_ml/primitives/cms_ml/'))
+    #discovery.add_primitives_path(os.path.join(os.getcwd(), '.python_packages/lib/site-packages/cms_ml/primitives/cms_ml/'))
+    discovery.add_primitives_path(os.path.join(os.getcwd(), '.venv/Lib/site-packages/cms_ml/primitives/cms_ml/'))
+    print(os.getcwd())
 
     #connection_string = "DefaultEndpointsProtocol=https;AccountName=adlsmp;AccountKey=WNk38TUO/zv4natpUzAqoUfwEez1/a8zLc5r068VZWCCSqlKhQojpVWLtQeC/XT/RekMBMhxEOE1+ASt4L8KAw==;EndpointSuffix=core.windows.net"
-    storage_account_key = "WNk38TUO/zv4natpUzAqoUfwEez1/a8zLc5r068VZWCCSqlKhQojpVWLtQeC/XT/RekMBMhxEOE1+ASt4L8KAw=="
+    storage_account_key = "QXbwAa+LRPQCkSvYxpjM71po9Xiu8Bb4PWnJTi7NJNVqJgouukf6XqDctjvLchnJlFFiJ0/ayBECBPiaB1CUDQ=="
 
     # Get the env variable (Function App > Your_Function_App > Configuration > Under Application Settings)
     #KVUri = os.environ["KeyVaultUri"]
@@ -73,10 +75,10 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     #client = SecretClient(vault_url=KVUri, credential=credential)
     #storage_account_key = client.get_secret("storageAccountKey2").value
 
-    storage_account_name = "adlsmp"
-    contenedor = "fssmp"
+    storage_account_name = "dlsdatalakerenewablespro"
+    contenedor = "produccion"
     source_dir = path.rsplit("/", 1)[0]
-    sink_dir = "processed_data"
+    sink_dir = "smp/processed_data"
     sink_file = windfarm + "_" + file.split(".")[0] + ".csv"
 
     # Generate the class DataLakeServiceClient for the ADL Gen2 defined.
@@ -96,15 +98,18 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     # Request a new lease for the sink file. This serves that it cannot be
     # modified/deleted by another process (for example, another call from 
     # Azure Functions).
-    sink_lease_client = DataLakeLeaseClient(file_client_sink)
-    sink_lease_client.acquire()
+    #sink_lease_client = DataLakeLeaseClient(file_client_sink)
+    #sink_lease_client.acquire()
 
 
     # Define where to store the temporary files. In this case, it'll
     # be in "/tmp/", because it's a Linux machine.
     #local_path = os.path.join(os.getcwd(), 'tmp/')
-    local_raw_path = "/tmp/"+ file
-    local_sink_path = "/tmp/"+ sink_file
+   
+    os.mkdir("./tmp")
+
+    local_raw_path = "tmp/"+ file
+    local_sink_path = "tmp/"+ sink_file
 
     # Create on the local machine the .MED file (empty).
     local_file_prueba = open(local_raw_path, 'wb')
@@ -156,14 +161,15 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     file_contents = local_file.read()
 
     # Break the lease opened beforhand so it can be modified.
-    sink_lease_client.break_lease()
+    #sink_lease_client.break_lease()
 
     # Upload de data to the ADL.
     file_client_sink.upload_data(data=file_contents, overwrite=True, length=len(file_contents))
     # Commit the data uploaded.
     file_client_sink.flush_data(len(file_contents))
 
-    
+    #os.remove("./tmp")
+
     if file:
         return func.HttpResponse(f"The file {file} processed successfully. This HTTP triggered function executed successfully.")
     else:
