@@ -55,8 +55,6 @@ jobs:
         python -m pip install --upgrade pip
         git config --global http.sslbackend gnutls
         pip install git+https://github.com/97arelloso-nttdata/cms_ml_prueba.git
-        pip uninstall lightfm
-        pip install lightfm
         pip install -r requirements.txt --target=".python_packages/lib/site-packages"
         popd
 
