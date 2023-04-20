@@ -55,7 +55,7 @@ jobs:
         python -m pip install --upgrade pip
         git config --global http.sslbackend gnutls
         pip install git+https://github.com/97arelloso-nttdata/lightfm_prueba.git
-        pip install -r requirements.txt --target=".python_packages/lib/site-packages"
+        pip install -r requirements.txt --target=".python_packages/lib/site-packages" --no-dependencies lightfm
         popd
 
     - name: 'Run Azure Functions Action'
